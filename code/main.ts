@@ -34,6 +34,7 @@ loadSprite("forest", "sprites/Backgrounds/forest.png");
 // Add background as a repeating layer
 scene('level1', () => {
 	// Create forest background that covers full screen
+
 	const forest = add([
 		sprite("forest", {
 			width: 1920,
@@ -42,7 +43,6 @@ scene('level1', () => {
 		pos(0, 0),
 		z(-1), // Put it behind other objects
 	]);
-
 	for (let i = 0; i < 30; i++) {
 		add([
 			sprite("ground"),
@@ -51,6 +51,17 @@ scene('level1', () => {
 			area(),
 			body({ isStatic: true }), // Make ground static so player can stand on it
 			"ground", // Add tag for collision detection
+		]);
+		add([
+			sprite("forest", {
+				width: 1920,
+				height: 1080,
+			}),
+			pos(0 * i, 0),
+			area(),
+			body(),
+			z(-1),
+			'forest'// Put it behind other objects
 		]);
 	}
 	const player = add([
@@ -72,7 +83,7 @@ scene('level1', () => {
 	});
 
 	onKeyDown("right", () => {
-		player.move(200, 0);
+		player.move(1000, 0);
 		player.flipX = false;
 
 		if (player.curAnim() !== "run") {
