@@ -17,7 +17,7 @@ loadSprite("player", "./sprites/u.png", {
 	sliceY: 9,
 	anims: {
 		idle: { from: 0, to: 7, loop: true },
-		run: { from: 11, to: 13, loop: true },
+		run: { from: 8, to: 13, loop: true },
 		jump: { from: 51, to: 51, loop: true },
 		fall: { from: 54, to: 54, loop: true },
 		explode: { from: 64, to: 69 },
@@ -52,17 +52,19 @@ scene('level1', () => {
 	]);
 	onKeyDown("left", () => {
 		player.move(-200, 0);
-		player.flipX = true; // face left
+		player.flipX=true
+
 		if (player.curAnim() !== "run") {
-			player.play("run");
+				player.play("run");
 		}
 	});
-	
-	onKeyDown("right", () => {
+
+	onKeyPress("right", () => {
 		player.move(200, 0);
-		player.flipX = false; // face right
+		player.flipX = false
+
 		if (player.curAnim() !== "run") {
-			player.play("run");
+				player.play("run");
 		}
 	});
 	
@@ -72,13 +74,13 @@ scene('level1', () => {
 	});
 	
 	onKeyRelease("left", () => {
-		if (!isKeyDown("right") && player.isGrounded()) {
+		if (!isKeyDown("right")) {
 			player.play("idle");
 		}
 	});
 	
 	onKeyRelease("right", () => {
-		if (!isKeyDown("left") && player.isGrounded()) {
+		if (!isKeyDown("left")) {
 			player.play("idle");
 		}
 	});
