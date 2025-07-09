@@ -45,10 +45,12 @@ scene('level1', () => {
 	}
 	const player = add([
 		sprite("player"),
-		pos(100, 100),
-		scale(5),
-		area(),
-		body(),
+		pos(20, 450),
+		scale(10),
+		area({ shape: new Rect(vec2(0, 18), 12, 12) }),
+		body({ mass: 100, jumpForce: 320 }),
+		anchor('center'),
+		opacity(),
 	]);
 	onKeyDown("left", () => {
 		player.move(-200, 0);
@@ -67,23 +69,38 @@ scene('level1', () => {
 			player.play("run");
 		}
 	});
-	
-	onKeyPress("up", () => {
-		player.jump(500);
-		player.play("jump");
+
+	onKeyPress("space", () => {
+		if (player.curAnim() !== "run") {
+			player.play("run");
+		}
 	});
-	
+
 	onKeyRelease("left", () => {
 		if (!isKeyDown("right")) {
 			player.play("idle");
 		}
 	});
-	
+
 	onKeyRelease("right", () => {
 		if (!isKeyDown("left")) {
 			player.play("idle");
 		}
 	});
+
+	player.onUpdate(() => {
+		// Prevent going beyond x = 0
+		if (player.pos.x < 0) {
+			player.pos.x = 0;
+			player.play("idle");
+			player.flipX = true;
+		}
+		if (player.pos.y > 450) {
+			player.pos.y = 450;
+			player.play("idle");
+		}
+	});
+
 
 });
 
