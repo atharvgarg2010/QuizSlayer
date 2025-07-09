@@ -33,13 +33,7 @@ loadSprite("forest", "sprites/Backgrounds/forest.png");
 
 // Add background as a repeating layer
 scene('level1', () => {
-	const forest = add([
-		sprite("forest", {
-			width: 1920,
-			height: 1080,
-			tiled: true
-		}),
-	]);
+
 	for (let i = 0; i < 30; i++) {
 		add([
 			sprite("ground"),
@@ -49,14 +43,21 @@ scene('level1', () => {
 			body({ isStatic: true }), // Make ground static so player can stand on it
 			"ground", // Add tag for collision detection
 		]);
+		const forest = add([
+			sprite("forest", {
+				width: 1920 * i,
+				height: 1080,
+				tiled: true
+			}),
+		]);
 	}
 	const player = add([
 		sprite("player"),
-		pos(20, 450),
+		pos(20, 500),
 		scale(10),
 		area(),
 		body({ mass: 100, jumpForce: 1020 }),
-		anchor('center'),
+		// anchor('center'),
 		opacity(),
 	]);
 	onKeyDown("left", () => {
@@ -100,28 +101,27 @@ scene('level1', () => {
 	player.onUpdate(() => {
 		// Make camera follow player (with safety check)
 		if (player.pos) {
-			camPos(player.pos.x, player.pos.y);
-			
+			camPos(player.pos.x, 1080);
+
 			// Update forest background to create infinite scrolling effect
-			forest.pos.x = Math.floor(player.pos.x / 1920) * 1920;
 
 			// Prevent going beyond x = 0
 			if (player.pos.x < 0) {
-				player.pos.x = 100;
-			player.play("idle");
-			player.flipX = false;
-		}
+				player.pos.x = 500;
+				player.play("idle");
+				player.flipX = false;
+			}
 
-		// Handle jump to idle transition
-		if (wasJumping && player.isGrounded() && player.curAnim() === "jump") {
-			player.play("idle");
-			wasJumping = false;
-		}
-		if (!player.isGrounded()) {
-			wasJumping = true;
-		}
+			// Handle jump to idle transition
+			if (wasJumping && player.isGrounded() && player.curAnim() === "jump") {
+				player.play("idle");
+				wasJumping = false;
+			}
+			if (!player.isGrounded()) {
+				wasJumping = true;
+			}
 
-		// Play falling animation when in air
+			// Play falling animation when in air
 		}
 	});
 
