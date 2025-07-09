@@ -1,9 +1,10 @@
 import kaboom from "kaboom"
+import { GameObj } from "kaboom";
 import "kaboom/global"
 
 // initialize context
 kaboom({
-	width: 1920,
+	width: 3000,
 	height: 1080,
 	background: [0, 0, 0],
 	scale: 1,
@@ -34,8 +35,7 @@ loadSprite("forest", "sprites/Backgrounds/forest.png");
 // Add background as a repeating layer
 scene('level1', () => {
 	// Create multiple forest background sprites for infinite scrolling
-	const forestSprites = [];
-	
+	const forestSprites: GameObj[] = [];
 	// Create 5 forest sprites to ensure seamless infinite scrolling
 	for (let i = 0; i < 5; i++) {
 		const forestSprite = add([
@@ -61,7 +61,7 @@ scene('level1', () => {
 	}
 	const player = add([
 		sprite("player"),
-		pos(20, 500),
+		pos(1, 500),
 		scale(10),
 		area(),
 		body({ mass: 100, jumpForce: 1020 }),
@@ -69,7 +69,7 @@ scene('level1', () => {
 		opacity(),
 	]);
 	onKeyDown("left", () => {
-		player.move(-200, 0);
+		player.move(-500, 0);
 		player.flipX = true;
 
 		if (player.curAnim() !== "run") {
@@ -78,7 +78,7 @@ scene('level1', () => {
 	});
 
 	onKeyDown("right", () => {
-		player.move(1000, 0);
+		player.move(500, 0);
 		player.flipX = false;
 
 		if (player.curAnim() !== "run") {
@@ -104,6 +104,12 @@ scene('level1', () => {
 			player.play("idle");
 		}
 	});
+	onKeyRelease("space", () => {
+		if (!isKeyDown("space")) {
+			player.play("idle");
+		}
+	});
+	
 	// Handle jump to idle transition in onUpdate
 	let wasJumping = false;
 	player.onUpdate(() => {
@@ -121,11 +127,11 @@ scene('level1', () => {
 
 			// Prevent going beyond x = 0
 			if (player.pos.x < 0) {
-				player.pos.x = 500;
+				player.pos.x = 1;
 				if (player.play) {
 					player.play("idle");
 				}
-				player.flipX = false;
+				// player.flipX = false;
 			}
 
 			// Handle jump to idle transition
@@ -139,9 +145,10 @@ scene('level1', () => {
 				wasJumping = true;
 			}
 
+
 			// Play falling animation when in air (with safety checks)
-			if (player.isGrounded && player.vel && player.vel.y !== undefined && 
-				!player.isGrounded() && player.vel.y > 0 && 
+			if (player.isGrounded && player.vel && player.vel.y !== undefined &&
+				!player.isGrounded() && player.vel.y > 0 &&
 				player.curAnim && player.curAnim() !== "fall") {
 				if (player.play) {
 					player.play("fall");
