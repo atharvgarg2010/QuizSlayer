@@ -108,34 +108,44 @@ scene('level1', () => {
 	let wasJumping = false;
 	player.onUpdate(() => {
 		// Make camera follow player (with safety check)
-		if (player.pos) {
+		if (player.pos && player.pos.x !== undefined && player.pos.y !== undefined) {
 			camPos(player.pos.x, 540); // Center camera vertically at screen center
 
 			// Update forest background sprites for infinite scrolling
 			forestSprites.forEach((forestSprite, index) => {
-				const baseX = Math.floor(player.pos.x / 1920) * 1920;
-				forestSprite.pos.x = baseX + (index - 2) * 1920;
+				if (forestSprite && forestSprite.pos) {
+					const baseX = Math.floor(player.pos.x / 1920) * 1920;
+					forestSprite.pos.x = baseX + (index - 2) * 1920;
+				}
 			});
 
 			// Prevent going beyond x = 0
 			if (player.pos.x < 0) {
 				player.pos.x = 500;
-				player.play("idle");
+				if (player.play) {
+					player.play("idle");
+				}
 				player.flipX = false;
 			}
 
 			// Handle jump to idle transition
-			if (wasJumping && player.isGrounded() && player.curAnim() === "jump") {
-				player.play("idle");
+			if (wasJumping && player.isGrounded && player.isGrounded() && player.curAnim && player.curAnim() === "jump") {
+				if (player.play) {
+					player.play("idle");
+				}
 				wasJumping = false;
 			}
-			if (!player.isGrounded()) {
+			if (player.isGrounded && !player.isGrounded()) {
 				wasJumping = true;
 			}
 
-			// Play falling animation when in air
-			if (!player.isGrounded() && player.vel.y > 0 && player.curAnim() !== "fall") {
-				player.play("fall");
+			// Play falling animation when in air (with safety checks)
+			if (player.isGrounded && player.vel && player.vel.y !== undefined && 
+				!player.isGrounded() && player.vel.y > 0 && 
+				player.curAnim && player.curAnim() !== "fall") {
+				if (player.play) {
+					player.play("fall");
+				}
 			}
 		}
 	});
