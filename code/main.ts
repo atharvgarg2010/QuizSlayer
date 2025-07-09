@@ -102,7 +102,7 @@ scene('level1', () => {
 			player.flipX = true;
 		}
 		// Play falling animation when in air
-		if (player.body && !player.isGrounded() && player.body.vel.y > 0) {
+		if (player.body && player.body.vel && !player.isGrounded() && player.body.vel.y > 0) {
 			player.play("fall");
 		}
 	});
