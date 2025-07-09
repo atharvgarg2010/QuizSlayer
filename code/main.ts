@@ -98,6 +98,9 @@ scene('level1', () => {
 	// Handle jump to idle transition in onUpdate
 	let wasJumping = false;
 	player.onUpdate(() => {
+		// Make camera follow player
+		camPos(player.pos.x, player.pos.y);
+
 		// Prevent going beyond x = 0
 		if (player.pos.x < 0) {
 			player.pos.x = 100;
