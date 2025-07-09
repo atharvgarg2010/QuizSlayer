@@ -33,7 +33,7 @@ loadSprite("forest", "sprites/Backgrounds/forest.png");
 
 // Add background as a repeating layer
 scene('level1', () => {
-	add([
+	const forest = add([
 		sprite("forest", {
 			width: 1920,
 			height: 1080,
@@ -98,6 +98,12 @@ scene('level1', () => {
 	// Handle jump to idle transition in onUpdate
 	let wasJumping = false;
 	player.onUpdate(() => {
+		// Make camera follow player
+		camPos(player.pos.x, player.pos.y);
+
+		// Update forest background to create infinite scrolling effect
+		forest.pos.x = Math.floor(player.pos.x / 1920) * 1920;
+
 		// Prevent going beyond x = 0
 		if (player.pos.x < 0) {
 			player.pos.x = 100;
