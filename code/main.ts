@@ -71,8 +71,9 @@ scene('level1', () => {
 	});
 
 	onKeyPress("space", () => {
-		if (player.curAnim() !== "run") {
-			player.play("run");
+		if (player.isGrounded()) {
+			player.jump();
+			player.play("jump");
 		}
 	});
 
