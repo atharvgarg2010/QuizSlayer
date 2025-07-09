@@ -20,12 +20,13 @@ loadSprite("player", "./sprites/u.png", {
 	sliceY: 9,
 	anims: {
 		idle: { from: 0, to: 5, loop: true },
-		run: { from: 9, to: 13, loop: true },
-		jump: { from: 51, to: 52, loop: true },
-		fall: { from: 54, to: 54, loop: true },
+		run: { from: 8, to: 15, loop: false },
+		jump: { from: 51, to: 52, loop: false },
+		fall: { from: 54, to: 54, loop: false },
 		explode: { from: 64, to: 69 },
 		attack: { from: 24, to: 28, speed: 16 },
 	},
+
 });
 loadSprite("ground", "sprites/Backgrounds/path.png");
 loadSprite("forest", "sprites/Backgrounds/forest.png");
@@ -94,16 +95,25 @@ scene('level1', () => {
 			player.play("idle");
 		}
 	});
-	player.onAnimEnd("jump", () => {
-		player.play("idle");
-	})
+	// Handle jump to idle transition in onUpdate
+	let wasJumping = false;
 	player.onUpdate(() => {
 		// Prevent going beyond x = 0
-		if (player.pos && player.pos.x < 0) {
-			player.pos.x = 0;
+		if (player.pos.x < 0) {
+			player.pos.x = 100;
 			player.play("idle");
-			player.flipX = true;
+			player.flipX = false;
 		}
+
+		// Handle jump to idle transition
+		if (wasJumping && player.isGrounded() && player.curAnim() === "jump") {
+			player.play("idle");
+			wasJumping = false;
+		}
+		if (!player.isGrounded()) {
+			wasJumping = true;
+		}
+
 		// Play falling animation when in air
 
 	});
