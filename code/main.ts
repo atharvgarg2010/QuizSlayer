@@ -52,19 +52,19 @@ scene('level1', () => {
 	]);
 	onKeyDown("left", () => {
 		player.move(-200, 0);
-		player.flipX=true
+		player.flipX = true;
 
 		if (player.curAnim() !== "run") {
-				player.play("run");
+			player.play("run");
 		}
 	});
 
-	onKeyPress("right", () => {
+	onKeyDown("right", () => {
 		player.move(200, 0);
-		player.flipX = false
+		player.flipX = false;
 
 		if (player.curAnim() !== "run") {
-				player.play("run");
+			player.play("run");
 		}
 	});
 	
