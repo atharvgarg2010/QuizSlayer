@@ -33,6 +33,15 @@ loadSprite("forest", "sprites/Backgrounds/forest.png");
 
 // Add background as a repeating layer
 scene('level1', () => {
+	// Create forest background that covers full screen
+	const forest = add([
+		sprite("forest", {
+			width: 1920,
+			height: 1080,
+		}),
+		pos(0, 0),
+		z(-1), // Put it behind other objects
+	]);
 
 	for (let i = 0; i < 30; i++) {
 		add([
@@ -42,13 +51,6 @@ scene('level1', () => {
 			area(),
 			body({ isStatic: true }), // Make ground static so player can stand on it
 			"ground", // Add tag for collision detection
-		]);
-		const forest = add([
-			sprite("forest", {
-				width: 1920 * i,
-				height: 1080,
-				tiled: true
-			}),
 		]);
 	}
 	const player = add([
@@ -101,9 +103,10 @@ scene('level1', () => {
 	player.onUpdate(() => {
 		// Make camera follow player (with safety check)
 		if (player.pos) {
-			camPos(player.pos.x, 1080);
+			camPos(player.pos.x, 540); // Center camera vertically at screen center
 
 			// Update forest background to create infinite scrolling effect
+			forest.pos.x = Math.floor(player.pos.x / 1920) * 1920;
 
 			// Prevent going beyond x = 0
 			if (player.pos.x < 0) {
