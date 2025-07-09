@@ -154,4 +154,7 @@ scene('level1', () => {
 });
 
 
+// Log the current screen dimensions
+console.log(`Game dimensions: ${width()} x ${height()}`);
+
 go('level1')
