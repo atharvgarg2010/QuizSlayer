@@ -12,16 +12,16 @@ kaboom({
 });
 
 // Set gravity for the game world
-setGravity(1600);
+setGravity(1800);
 
 // Load the background image
 loadSprite("player", "./sprites/u.png", {
 	sliceX: 8,
 	sliceY: 9,
 	anims: {
-		idle: { from: 0, to: 7, loop: true },
-		run: { from: 8, to: 13, loop: true },
-		jump: { from: 51, to: 51, loop: true },
+		idle: { from: 0, to: 5, loop: true },
+		run: { from: 9, to: 13, loop: true },
+		jump: { from: 51, to: 52, loop: true },
 		fall: { from: 54, to: 54, loop: true },
 		explode: { from: 64, to: 69 },
 		attack: { from: 24, to: 28, speed: 16 },
@@ -42,7 +42,8 @@ scene('level1', () => {
 	for (let i = 0; i < 30; i++) {
 		add([
 			sprite("ground"),
-			pos(i * 64, 950), // Fixed spacing - ground sprites should be 64px wide
+			pos(i * 1080, 950),
+			// Fixed spacing - ground sprites should be 64px wide
 			area(),
 			body({ isStatic: true }), // Make ground static so player can stand on it
 			"ground", // Add tag for collision detection
@@ -93,7 +94,9 @@ scene('level1', () => {
 			player.play("idle");
 		}
 	});
-
+	player.onAnimEnd("jump", () => {
+		player.play("idle");
+	})
 	player.onUpdate(() => {
 		// Prevent going beyond x = 0
 		if (player.pos && player.pos.x < 0) {
@@ -102,9 +105,7 @@ scene('level1', () => {
 			player.flipX = true;
 		}
 		// Play falling animation when in air
-		if (!player.isGrounded() && player.vel && player.vel.y > 0) {
-			player.play("fall");
-		}
+
 	});
 
 
