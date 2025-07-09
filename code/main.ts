@@ -55,20 +55,32 @@ scene('level1', () => {
 		player.flipX = true; // face left
 		if (player.curAnim() !== "run") {
 			player.play("run");
-		}else{
-			player.play("idle")
 		}
 	});
+	
 	onKeyDown("right", () => {
 		player.move(200, 0);
-		player.flipX = false; // face left
+		player.flipX = false; // face right
 		if (player.curAnim() !== "run") {
 			player.play("run");
 		}
-	})
-	onkeyup("up", () => {
+	});
+	
+	onKeyPress("up", () => {
 		player.jump(500);
 		player.play("jump");
+	});
+	
+	onKeyRelease("left", () => {
+		if (!isKeyDown("right") && player.isGrounded()) {
+			player.play("idle");
+		}
+	});
+	
+	onKeyRelease("right", () => {
+		if (!isKeyDown("left") && player.isGrounded()) {
+			player.play("idle");
+		}
 	});
 
 });
