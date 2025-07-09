@@ -11,6 +11,9 @@ kaboom({
 	letterbox: true,
 });
 
+// Set gravity for the game world
+setGravity(1600);
+
 // Load the background image
 loadSprite("player", "./sprites/u.png", {
 	sliceX: 8,
@@ -39,8 +42,10 @@ scene('level1', () => {
 	for (let i = 0; i < 30; i++) {
 		add([
 			sprite("ground"),
-			pos(i * 1080, 950), // y = 1000 is near the bottom of 1080px canvas
+			pos(i * 64, 950), // Fixed spacing - ground sprites should be 64px wide
 			area(),
+			body({ isStatic: true }), // Make ground static so player can stand on it
+			"ground", // Add tag for collision detection
 		]);
 	}
 	const player = add([
@@ -96,9 +101,9 @@ scene('level1', () => {
 			player.play("idle");
 			player.flipX = true;
 		}
-		if (player.pos.y > 450) {
-			player.pos.y = 450;
-			player.play("idle");
+		// Play falling animation when in air
+		if (!player.isGrounded() && player.vel.y > 0) {
+			player.play("fall");
 		}
 	});
 
