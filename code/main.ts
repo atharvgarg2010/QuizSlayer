@@ -53,7 +53,7 @@ scene('level1', () => {
 		pos(20, 450),
 		scale(10),
 		area({ shape: new Rect(vec2(0, 18), 12, 12) }),
-		body({ mass: 100, jumpForce: 320 }),
+		body({ mass: 100, jumpForce: 1020 }),
 		anchor('center'),
 		opacity(),
 	]);
@@ -102,7 +102,7 @@ scene('level1', () => {
 			player.flipX = true;
 		}
 		// Play falling animation when in air
-		if (player.vel && !player.isGrounded() && player.vel.y > 0) {
+		if (player.body && !player.isGrounded() && player.body.vel.y > 0) {
 			player.play("fall");
 		}
 	});
