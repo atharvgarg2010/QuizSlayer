@@ -52,7 +52,7 @@ scene('level1', () => {
 		sprite("player"),
 		pos(20, 450),
 		scale(10),
-		area({ shape: new Rect(vec2(0, 18), 12, 12) }),
+		area({ shape: new Rect(vec2(2, 18), 10, 12) }),
 		body({ mass: 100, jumpForce: 1020 }),
 		anchor('center'),
 		opacity(),
