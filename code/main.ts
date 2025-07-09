@@ -33,35 +33,30 @@ loadSprite("forest", "sprites/Backgrounds/forest.png");
 
 // Add background as a repeating layer
 scene('level1', () => {
-	// Create forest background that covers full screen
-
-	const forest = add([
-		sprite("forest", {
-			width: 1920,
-			height: 1080,
-		}),
-		pos(0, 0),
-		z(-1), // Put it behind other objects
-	]);
-	for (let i = 0; i < 30; i++) {
-		add([
-			sprite("ground"),
-			pos(i * 1080, 950),
-			// Fixed spacing - ground sprites should be 64px wide
-			area(),
-			body({ isStatic: true }), // Make ground static so player can stand on it
-			"ground", // Add tag for collision detection
-		]);
-		add([
+	// Create multiple forest background sprites for infinite scrolling
+	const forestSprites = [];
+	
+	// Create 5 forest sprites to ensure seamless infinite scrolling
+	for (let i = 0; i < 5; i++) {
+		const forestSprite = add([
 			sprite("forest", {
 				width: 1920,
 				height: 1080,
 			}),
-			pos(0 * i, 0),
+			pos(i * 1920, 0),
+			z(-1), // Put it behind other objects
+		]);
+		forestSprites.push(forestSprite);
+	}
+
+	// Create ground platforms
+	for (let i = 0; i < 30; i++) {
+		add([
+			sprite("ground"),
+			pos(i * 1080, 950),
 			area(),
-			body(),
-			z(-1),
-			'forest'// Put it behind other objects
+			body({ isStatic: true }), // Make ground static so player can stand on it
+			"ground", // Add tag for collision detection
 		]);
 	}
 	const player = add([
@@ -116,8 +111,11 @@ scene('level1', () => {
 		if (player.pos) {
 			camPos(player.pos.x, 540); // Center camera vertically at screen center
 
-			// Update forest background to create infinite scrolling effect
-			forest.pos.x = Math.floor(player.pos.x / 1920) * 1920;
+			// Update forest background sprites for infinite scrolling
+			forestSprites.forEach((forestSprite, index) => {
+				const baseX = Math.floor(player.pos.x / 1920) * 1920;
+				forestSprite.pos.x = baseX + (index - 2) * 1920;
+			});
 
 			// Prevent going beyond x = 0
 			if (player.pos.x < 0) {
@@ -136,6 +134,9 @@ scene('level1', () => {
 			}
 
 			// Play falling animation when in air
+			if (!player.isGrounded() && player.vel.y > 0 && player.curAnim() !== "fall") {
+				player.play("fall");
+			}
 		}
 	});
 
