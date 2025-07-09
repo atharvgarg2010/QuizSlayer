@@ -96,13 +96,13 @@ scene('level1', () => {
 
 	player.onUpdate(() => {
 		// Prevent going beyond x = 0
-		if (player.pos.x < 0) {
+		if (player.pos && player.pos.x < 0) {
 			player.pos.x = 0;
 			player.play("idle");
 			player.flipX = true;
 		}
 		// Play falling animation when in air
-		if (!player.isGrounded() && player.vel.y > 0) {
+		if (player.vel && !player.isGrounded() && player.vel.y > 0) {
 			player.play("fall");
 		}
 	});
