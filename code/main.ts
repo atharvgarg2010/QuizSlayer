@@ -20,7 +20,7 @@ loadSprite("player", "./sprites/u.png", {
 	sliceY: 9,
 	anims: {
 		idle: { from: 0, to: 5, loop: true },
-		run: { from: 8, to: 15, loop: false },
+		run: { from: 8, to: 15, loop: true },
 		jump: { from: 51, to: 52, loop: false },
 		fall: { from: 54, to: 54, loop: false },
 		explode: { from: 64, to: 69 },
@@ -98,9 +98,6 @@ scene('level1', () => {
 	// Handle jump to idle transition in onUpdate
 	let wasJumping = false;
 	player.onUpdate(() => {
-		// Make camera follow player
-		camPos(player.pos.x, player.pos.y);
-
 		// Prevent going beyond x = 0
 		if (player.pos.x < 0) {
 			player.pos.x = 100;
