@@ -125,7 +125,7 @@ scene('level1', () => {
 				body(),
 				pos(0, -9),
 				scale(-10,10),
-				
+
 				'skeleton'
 			]
 		}
@@ -299,7 +299,7 @@ scene('level1', () => {
 		})
 	})
 
-	});
+	})
 });
 
 
