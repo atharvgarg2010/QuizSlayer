@@ -3,6 +3,11 @@ import { GameObj } from "kaboom";
 import "kaboom/global"
 
 // initialize context
+const questions = [
+	
+]
+let score = 0
+
 kaboom({
 	width: 3000,
 	height: 1080,
@@ -53,13 +58,13 @@ loadSprite("skeleton", "/sprites/Skeleton enemy.png", {
 			from: 24, to: 31, loop: true,
 		},
 		attack: {
-			from: 8, to: 15, loop: false,
+			from: 8, to: 13, loop: true,
 		},
 		hit: {
 			from: 32, to: 35, loop: false,
 		},
 		death: {
-			from: 0, to: 5, loop: false,
+			from: 15, to: 25, loop: false,
 		}
 	},
 })
@@ -78,10 +83,11 @@ loadSprite("coin", "sprites/coin.png", {
 
 // Add background as a repeating layer
 scene('level1', () => {
+	let questionShown = false
 	addLevel([
 		"                             ",
-		"            /   ___             ",
-		"     ?      __             ",
+		"            /                ",
+		"     ?  ?      __          ",
 		"                           ",
 		"                           ",
 		"                          ",
@@ -169,7 +175,7 @@ scene('level1', () => {
 	]);
 	player.height = 40
 
-	let score = 0
+	
 	const ScoreLabel = add([
 		text("Score: " + score, { size: 48 }),
 		pos(24, 60),
@@ -292,48 +298,291 @@ scene('level1', () => {
 			anchor("center"),
 			lifespan(5),
 		])
-
+		
 		// Wait 5 seconds, then go to "equation" scene
 		wait(5, () => {
-			go("equation")
+			showQuestionFrame(skel)
+
 		})
 	})
 
-	})
+	function showQuestionFrame(skel) {
+		console.log("showQuestionFrame called")
+		const q = {
+			question: "What is 5 × 6?",
+			options: ["25", "30", "35", "40"],
+			correct: "30",
+		}
+
+		const frame = add([
+			rect(1000, 400),
+			pos(player.pos.add(vec2(0, -200))),
+			color(255, 255, 200),
+			outline(4, rgb(80, 50, 10)),
+			anchor("center"),
+			z(10),
+		])
+
+		const questionText = add([
+			text(q.question, { size: 48 }),
+			pos(center().x, center().y - 150),
+			anchor("center"),
+			color(0, 0, 0),
+			z(11),
+		])
+
+		// Add options (2x2 grid)
+		const optionWidth = 240
+		const optionHeight = 80
+		const spacingX = 60
+		const spacingY = 40
+		const startX = center().x - optionWidth - spacingX / 2
+		const startY = center().y - 20
+
+		q.options.forEach((opt, i) => {
+			const row = Math.floor(i / 2)
+			const col = i % 2
+			const x = startX + col * (optionWidth + spacingX)
+			const y = startY + row * (optionHeight + spacingY)
+
+			const btn = add([
+				rect(optionWidth, optionHeight, { radius: 12 }),
+				pos(x, y),
+				color(255, 230, 180),
+				outline(3, rgb(100, 100, 100)),
+				area(),
+				anchor("center"),
+				"option",
+				z(11),
+				{ value: opt },
+			])
+
+			add([
+				text(opt, { size: 32 }),
+				pos(x, y),
+				anchor("center"),
+				color(0, 0, 0),
+				z(12),
+			])
+		})
+
+		onClick("option", (btn) => {
+			if (btn.value === q.correct) {
+				const correctmsg = add([
+					text("✅ Correct!", { size: 40 },"correct"),
+					pos(center().x, center().y + 150),
+					color(0, 180, 0),
+					anchor("center"),
+					z(12),
+				])
+				wait(2, () =>{
+					destroy(correctmsg)
+					destroyAll("option")
+					destroy(frame)
+					player.play("attack")
+					skel.play("death")
+					wait(1,()=>{
+						
+					player.play("idle")
+					})
+					wait(1,()=>{
+						score += 2
+						ScoreLabel.text = "Score: " + score
+						destroy(skel) // allow to pass
+					})
+				})
+			} else {
+				const wrong=add([
+					text("❌ Wrong!", { size: 40 }),
+					pos(center().x, center().y + 150),
+					color(200, 0, 0),
+					anchor("center"),
+					z(12),
+				])
+				wait(2, () =>{
+					destroyAll("option")
+					destroy(frame)
+					destroy(wrong)
+					wait(0,()=>{
+						skel.play("attack")
+						player.play("explode")
+						wait(0,()=>{
+							skel.play("idle")
+							
+						})
+					})
+					go("gameover")
+				})
+			}
+			// Optional: disable further input or close frame after
+		})
+	}
 });
 
+loadSprite("ebg", "/sprites/wooden-floor-background.jpg");
 
 
 
+// scene("equation", () => {
+// 	// Background
+// 	add([
+// 		sprite("ebg"),
+// 		scale(2),
+// 		pos(0, 0),
+// 		z(-1),
+// 	]);
 
-const questions = [
-	{
-		question: "3 + 5 = ?",
-		options: ["6", "8", "9", "7"],
-		correct: "8"
-	},
-	{
-		question: "12 ÷ 4 = ?",
-		options: ["3", "2", "4", "6"],
-		correct: "3"
-	},
-	{
-		question: "7 × 6 = ?",
-		options: ["42", "36", "48", "40"],
-		correct: "42"
-	}
-]
+// 	// Question data
+// 	const q = {
+// 		question: "7 × 6 = ?",
+// 		options: ["42", "36", "48", "40"],
+// 		correct: "42"
+// 	};
 
-scene('equation', () =>{
-	const q = choose(questions) // pick a random question
+// 	// Main frame box (like in your image)
+// 	const frameWidth = 1000;
+// 	const frameHeight = 700;
+
+// 	add([
+// 		rect(frameWidth, frameHeight),
+// 		pos(center()),
+// 		outline(4, rgb(230, 220, 160)),  // soft golden border
+// 		anchor("center"),
+// 		z(0),
+// 	]);
+
+// 	// Equation line
+// 	add([
+// 		text(q.question, {
+// 			size: 60,
+// 			width: frameWidth - 100,
+// 			font: "sink",
+// 		}),
+// 		pos(center().x, center().y - frameHeight / 2 + 70),
+// 		color(0, 0, 0),
+// 		anchor("center"),
+// 		z(1),
+// 	]);
+
+// 	// Grid layout inside the box
+// 	const optionWidth = 260;
+// 	const optionHeight = 100;
+// 	const spacingX = 80;
+// 	const spacingY = 60;
+
+// 	const baseX = center().x - optionWidth / 2 - spacingX / 2;
+// 	const baseY = center().y - 40;
+
+// 	q.options.forEach((opt, i) => {
+// 		const row = Math.floor(i / 2);
+// 		const col = i % 2;
+
+// 		const x = baseX + col * (optionWidth + spacingX);
+// 		const y = baseY + row * (optionHeight + spacingY);
+
+// 		const btn = add([
+// 			rect(optionWidth, optionHeight, { radius: 12 }),
+// 			pos(x, y),
+// 			color(255, 250, 220),
+// 			outline(3, rgb(100, 100, 100)),
+// 			area(),
+// 			anchor("center"),
+// 			"option",
+// 			{ value: opt },
+// 		]);
+
+// 		// Hover highlight
+		
+
+// 		// Option text
+// 		add([
+// 			text(opt, { size: 36, font: "sink" }),
+// 			pos(x, y),
+// 			color(0, 0, 0),
+// 			anchor("center"),
+// 		]);
+// 	});
+
+// 	// On click show result
+// 	onClick("option", (btn) => {
+// 		destroyAll("option");
+
+// 		add([
+// 			text(
+// 				btn.value === q.correct ? "✅ Correct!" : `❌ Wrong! Answer: ${q.correct}`,
+// 				{ size: 48 }
+// 			),
+// 			pos(center().x, center().y + frameHeight / 2 - 60),
+// 			color(btn.value === q.correct ? rgb(0, 150, 0) : rgb(180, 0, 0)),
+// 			anchor("center"),
+// 		]);
+// 		wait(2, () => {
+// 			go("level1");
+// 		})
+// 	});
+// });
+
+scene("gameover", () => {
+	// Add a background
+	add([
+		sprite("ebg"), // Assuming you have a suitable background sprite
+		scale(width() / 1920, height() / 1080), // Scale to fit screen
+		fixed(),      // Keep the background fixed during camera movement
+		z(-1),        // Ensure it's behind other elements
+	]);
+
+	// Game Over text
+	add([
+		text("Game Over!", {
+			size: 120,
+			font: "sink",
+		}),
+		pos(width() / 2, height() / 2 - 150),
+		anchor("center"),
+		color(255, 0, 0),
+		outline(8),
+	]);
+
+	// Display the final score
+	add([
+		text(`Final Score: ${score}`, {
+			size: 64,
+			font: "sink",
+		}),
+		pos(width() / 2, height() / 2),
+		anchor("center"),
+		color(255, 255, 255),
+		outline(4),
+	]);
+
+	// Play Again button
+	const playAgainButton = add([
+		rect(320, 80, { radius: 12 }),
+		pos(width() / 2, height() / 2 + 150),
+		anchor("center"),
+		color(0, 128, 255),
+		outline(4),
+		area(),
+		"playAgainButton", // Tag for event handling
+	]);
 
 	add([
-		text(q.question, { size: 36 }),
-		pos(100, 60),
+		text("Play Again", {
+			size: 48,
+			font: "sink",
+		}),
+		pos(width() / 2, height() / 2 + 150),
+		anchor("center"),
 		color(255, 255, 255),
-	])
-} )
+	]);
 
+	// Event handler for the "Play Again" button
+	onClick("playAgainButton", () => {
+		lives = 3;
+		score = 0;
+		go("level1"); // Restart the game
+	});
+});
 // Log the current screen dimensions
 console.log(`Game dimensions: ${width()} x ${height()}`);
 
