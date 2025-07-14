@@ -11,7 +11,7 @@ kaboom({
 	stretch: true,
 	letterbox: true,
 });
-
+let lives = 3;
 // Set gravity for the game world
 setGravity(1800);
 
@@ -29,8 +29,40 @@ loadSprite("player", "./sprites/u.png", {
 	},
 
 });
+loadSprite("player1", "sprites/sprite.png", {
+	sliceX: 2, // change based on number of frames in a row
+	sliceY: 1, // if it's a single row
+	anims: {
+		idle: { from: 0, to: 3, loop: true },
+		run: { from: 4, to: 7, loop: true },
+	},
+});
 loadSprite("ground", "sprites/Backgrounds/path.png");
+loadSprite("path", "sprites/Backgrounds/ground.png");
 loadSprite("forest", "sprites/Backgrounds/forest.png");
+loadSprite("heart", "sprites/Heart.png");
+loadSprite("skeleton", "/sprites/Skeleton enemy.png", {
+	sliceX: 13, // number of columns in your sprite sheet
+	sliceY: 7,
+	// number of rows in your sprite sheet
+	anims: {
+		idle: {
+			from: 0, to: 2, loop: true,
+		},
+		run: {
+			from: 24, to: 31, loop: true,
+		},
+		attack: {
+			from: 8, to: 15, loop: false,
+		},
+		hit: {
+			from: 32, to: 35, loop: false,
+		},
+		death: {
+			from: 0, to: 5, loop: false,
+		}
+	},
+})
 loadSprite("coin", "sprites/coin.png", {
 	sliceX: 8,
 	anims: {
@@ -44,16 +76,15 @@ loadSprite("coin", "sprites/coin.png", {
 });
 
 
-
 // Add background as a repeating layer
 scene('level1', () => {
 	addLevel([
-		"                          $",
-		"                          $",
-		"           $$             $",
-		"                          $",
+		"                             ",
+		"            /   ___             ",
+		"     ?      __             ",
 		"                           ",
-		"                          &",
+		"                           ",
+		"                          ",
 		"===========================",
 	], {
 		// define the size of tile block
@@ -61,16 +92,42 @@ scene('level1', () => {
 		tileHeight: 320,
 		// define what each symbol means, by a function returning a component list (what will be passed to add())
 		tiles: {
-				"=": () => [
-						sprite("ground"),
-						area(),
-				],
-				"$": () => [
-						sprite("coin", {anim:'spin'}),
-						area(),
-						pos(0, -9),
-				],
+			"=": () => [
+				sprite("ground"),
+				area(),
+				body({ isStatic: true }),
+				pos(0, -9),
 
+			],
+			"$": () => [
+				sprite("coin", { anim: 'spin' }),
+				area(),
+				pos(0, -9),
+				'coin'
+			],
+
+			"/": () => [
+				sprite("coin", { anim: 'spin' }),
+				area(),
+				body(),
+				pos(0, -9),
+				'coin'
+			],
+			"_": () => [
+				sprite("path"),
+				area(),
+				body({ isStatic: true }),
+				pos(0, -9),
+			],
+			"?": () => [
+				sprite("skeleton", { anim: "idle" }),
+				area(),
+				body(),
+				pos(0, -9),
+				scale(-10,10),
+				
+				'skeleton'
+			]
 		}
 	})
 	// Create multiple forest background sprites for infinite scrolling
@@ -88,6 +145,7 @@ scene('level1', () => {
 		forestSprites.push(forestSprite);
 	}
 
+
 	// Create ground platforms
 	for (let i = 0; i < 30; i++) {
 		add([
@@ -101,13 +159,24 @@ scene('level1', () => {
 	const player = add([
 		sprite("player"),
 		pos(1, 500),
-		scale(10),
-		rect(20,40),
-		area(),
-		body({ mass: 200, jumpForce: 1020 }),
+		scale(vec2(7.92, 10)),
+		area({
+			shape: new Rect(vec2(20, 10), 24, 38) // offset and custom size
+		}),
+		body({ mass: 200, jumpForce: 1220 }),
 		// anchor('center'),
 		opacity(),
 	]);
+	player.height = 40
+
+	let score = 0
+	const ScoreLabel = add([
+		text("Score: " + score, { size: 48 }),
+		pos(24, 60),
+		fixed(),
+
+	]);
+
 	onKeyDown("left", () => {
 		player.move(-500, 0);
 		player.flipX = true;
@@ -115,6 +184,7 @@ scene('level1', () => {
 		if (player.curAnim() !== "run") {
 			player.play("run");
 		}
+
 	});
 
 	onKeyDown("right", () => {
@@ -124,13 +194,23 @@ scene('level1', () => {
 		if (player.curAnim() !== "run") {
 			player.play("run");
 		}
-	});
 
+	});
+	let jumpCount = 0
 	onKeyPress("space", () => {
 		if (player.isGrounded()) {
 			player.jump();
 			player.play("jump");
+			jumpCount += 1
+		} else {
+			jumpCount++
+			if (jumpCount <= 2) {
+				player.jump(600)
+				player.play('jump')
+
+			}
 		}
+		console.log(player.width, player.height)
 	});
 
 	onKeyRelease("left", () => {
@@ -149,7 +229,7 @@ scene('level1', () => {
 			player.play("idle");
 		}
 	});
-	
+
 	// Handle jump to idle transition in onUpdate
 	let wasJumping = false;
 	player.onUpdate(() => {
@@ -178,6 +258,7 @@ scene('level1', () => {
 			if (wasJumping && player.isGrounded && player.isGrounded() && player.curAnim && player.curAnim() === "jump") {
 				if (player.play) {
 					player.play("idle");
+					jumpCount = 0
 				}
 				wasJumping = false;
 			}
@@ -196,10 +277,62 @@ scene('level1', () => {
 			}
 		}
 	});
+	player.onCollide("coin", (coin) => {
+		destroy(coin)
+		score += 1
+		ScoreLabel.text = "Score: " + score
 
 
+	});
+	player.onCollide("skeleton", (skel) => {
+		add([
+			text("Ouch! Watch where you're going!\nThe only way you can pass me is through this equation....", { size: 32 }),
+			pos(player.pos.x, player.pos.y - 50),
+			color(255, 255, 255),
+			anchor("center"),
+			lifespan(5),
+		])
+
+		// Wait 5 seconds, then go to "equation" scene
+		wait(5, () => {
+			go("equation")
+		})
+	})
+
+	});
 });
 
+
+
+
+
+const questions = [
+	{
+		question: "3 + 5 = ?",
+		options: ["6", "8", "9", "7"],
+		correct: "8"
+	},
+	{
+		question: "12 ÷ 4 = ?",
+		options: ["3", "2", "4", "6"],
+		correct: "3"
+	},
+	{
+		question: "7 × 6 = ?",
+		options: ["42", "36", "48", "40"],
+		correct: "42"
+	}
+]
+
+scene('equation', () =>{
+	const q = choose(questions) // pick a random question
+
+	add([
+		text(q.question, { size: 36 }),
+		pos(100, 60),
+		color(255, 255, 255),
+	])
+} )
 
 // Log the current screen dimensions
 console.log(`Game dimensions: ${width()} x ${height()}`);
